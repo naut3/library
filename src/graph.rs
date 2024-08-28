@@ -5,14 +5,14 @@ type Index = u32;
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct Graph<O: Orientation, R: Representation> {
-    pub size: u32,
+    pub size: Index,
     representation: R,
     _marker: std::marker::PhantomData<O>,
 }
 
 impl<O: Orientation, R: Representation<W = W>, W: Clone + Copy> Graph<O, R> {
     /// make a new graph with `size` vertices
-    pub fn new(size: u32) -> Self {
+    pub fn new(size: Index) -> Self {
         Self {
             size,
             representation: R::new(size),
@@ -36,7 +36,7 @@ impl<O: Orientation, R: Representation<W = W>, W: Clone + Copy> Graph<O, R> {
         self.representation.adjacent(v)
     }
 
-    pub fn from_edges(size: u32, edges: &[(Index, Index, W)]) -> Self {
+    pub fn from_edges(size: Index, edges: &[(Index, Index, W)]) -> Self {
         let mut graph = Self::new(size);
 
         for &(u, v, w) in edges {
@@ -47,12 +47,12 @@ impl<O: Orientation, R: Representation<W = W>, W: Clone + Copy> Graph<O, R> {
     }
 }
 
-impl<O: Orientation, R: Representation<W = W>, W: Clone + Copy> std::ops::Index<u32>
+impl<O: Orientation, R: Representation<W = W>, W: Clone + Copy> std::ops::Index<Index>
     for Graph<O, R>
 {
     type Output = [(Index, W)];
 
-    fn index(&self, index: u32) -> &Self::Output {
+    fn index(&self, index: Index) -> &Self::Output {
         self.adjacent(index)
     }
 }
@@ -69,7 +69,7 @@ impl<O: Orientation, W: Clone> Graph<O, AdjacencyList<W>> {
 
 pub trait Representation {
     type W;
-    fn new(size: u32) -> Self;
+    fn new(size: Index) -> Self;
     fn adjacent(&self, v: Index) -> &[(Index, Self::W)];
     fn add_edge(&mut self, u: Index, v: Index, w: Self::W);
 }
@@ -81,7 +81,7 @@ pub struct AdjacencyList<W> {
 
 impl<W: Clone> Representation for AdjacencyList<W> {
     type W = W;
-    fn new(size: u32) -> Self {
+    fn new(size: Index) -> Self {
         Self {
             list: vec![vec![]; size as usize],
         }
@@ -109,7 +109,7 @@ impl<W> From<AdjacencyList<W>> for CrsList<W> {
 
         for i in 0..size {
             list.append(&mut value.list[i]);
-            ptr.push(list.len() as u32);
+            ptr.push(list.len() as Index);
         }
 
         Self { list, ptr }
@@ -118,7 +118,7 @@ impl<W> From<AdjacencyList<W>> for CrsList<W> {
 
 impl<W> Representation for CrsList<W> {
     type W = W;
-    fn new(_size: u32) -> Self {
+    fn new(_size: Index) -> Self {
         unreachable!();
     }
     fn adjacent(&self, v: Index) -> &[(Index, Self::W)] {
