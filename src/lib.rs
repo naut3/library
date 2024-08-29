@@ -3,3 +3,4 @@ pub mod cumulative_sum;
 pub mod cycle_detection;
 pub mod graph;
 pub mod unionfind;
+pub mod wavelet_matrix;
