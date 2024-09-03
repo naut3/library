@@ -1,31 +1,30 @@
-use crate::graph::{Directed, Graph, Representation};
+use crate::graph::Graph;
 
-pub fn cycle_detection_directed<R: Representation<W = W>, W: Clone + Copy>(
-    graph: Graph<Directed, R>,
-) -> bool {
-    struct DFS<R: Representation<W = W>, W: Clone + Copy> {
-        graph: Graph<Directed, R>,
+pub fn cycle_detection(graph: &impl Graph) -> bool {
+    struct DFS {
         seen: Vec<bool>,
         fin: Vec<bool>,
     }
 
-    impl<R: Representation<W = W>, W: Clone + Copy> DFS<R, W> {
-        fn from(graph: Graph<Directed, R>) -> bool {
-            let size = graph.size;
-            let mut g = Self {
-                graph,
+    impl DFS {
+        fn new(graph: &impl Graph) -> Self {
+            assert!(graph.is_directed_edge());
+
+            let size = graph.size();
+
+            Self {
                 seen: vec![false; size as usize],
                 fin: vec![false; size as usize],
-            };
+            }
+        }
 
-            for i in 0..size {
-                if g.seen[i as usize] {
+        fn run(&mut self, graph: &impl Graph) -> bool {
+            for i in 0..graph.size() {
+                if self.seen[i as usize] {
                     continue;
                 }
 
-                let ret = g.dfs(i);
-
-                if ret {
+                if self.dfs(graph, i) {
                     return true;
                 }
             }
@@ -33,29 +32,30 @@ pub fn cycle_detection_directed<R: Representation<W = W>, W: Clone + Copy>(
             false
         }
 
-        fn dfs(&mut self, v: u32) -> bool {
+        fn dfs(&mut self, graph: &impl Graph, v: u32) -> bool {
             self.seen[v as usize] = true;
 
-            for (nxt, _) in self.graph.adjacent(v).to_owned() {
-                let nxt = nxt as usize;
-                if self.fin[nxt] {
+            for &(u, _) in graph.adjacent(v) {
+                let u_us = u as usize;
+
+                if self.fin[u_us] {
                     continue;
                 }
 
-                if self.seen[nxt] && !self.fin[nxt] {
+                if self.seen[u_us] && !self.fin[u_us] {
                     return true;
                 }
 
-                if self.dfs(nxt as u32) {
+                if self.dfs(graph, u) {
                     return true;
                 }
             }
 
             self.fin[v as usize] = true;
-
-            return false;
+            false
         }
     }
 
-    DFS::from(graph)
+    let mut dfs = DFS::new(graph);
+    dfs.run(graph)
 }

@@ -1,37 +1,10 @@
-use library::graph::{DirectedGraph, UndirectedGraph};
+use library::graph::*;
 
 #[test]
 fn test_001_directed_graph() {
-    let mut graph = DirectedGraph::<()>::new(5);
-
-    assert_eq!(graph.adjacent(0), &[]);
-
-    graph.add_edge(0, 1, ());
-    graph.add_edge(0, 3, ());
-    assert_eq!(graph[0], [(1, ()), (3, ())]);
-
-    graph.add_edge(2, 0, ());
-    assert_eq!(graph[0], [(1, ()), (3, ())]);
-}
-
-#[test]
-fn test_002_undirected_graph() {
-    let mut graph = UndirectedGraph::<u32>::new(5);
-
-    assert_eq!(graph[4], []);
-
-    graph.add_edge(3, 4, 1);
-    assert_eq!(graph[3], [(4, 1)]);
-    assert_eq!(graph[4], [(3, 1)]);
-
-    graph.add_edge(2, 3, 10);
-    assert_eq!(graph[3], [(4, 1), (2, 10)]);
-}
-
-#[test]
-fn test_003_convert_repr() {
-    let size = 5;
-    let mut graph = DirectedGraph::<()>::new(size);
+    // 辺を追加する -> 隣接辺を列挙 までが意図した通りに動くことを確認する
+    let size = 500;
+    let mut graph = DirectedAdjGraph::new(size);
 
     for i in 0..size {
         for j in i + 1..size {
@@ -39,10 +12,32 @@ fn test_003_convert_repr() {
         }
     }
 
-    assert_eq!(graph[0], [(1, ()), (2, ()), (3, ()), (4, ())]);
+    for i in 0..size {
+        assert_eq!(graph.adjacent(i), &graph[i]);
+        assert_eq!(
+            graph.adjacent(i),
+            &(i + 1..size).map(|v| (v, ())).collect::<Vec<_>>()
+        );
+    }
 
     let graph = graph.to_crs();
 
-    assert_eq!(graph[0], [(1, ()), (2, ()), (3, ()), (4, ())]);
-    assert_eq!(graph[1], [(2, ()), (3, ()), (4, ())]);
+    for i in 0..size {
+        assert_eq!(graph.adjacent(i), &graph[i]);
+        assert_eq!(
+            graph.adjacent(i),
+            &(i + 1..size).map(|v| (v, ())).collect::<Vec<_>>()
+        );
+    }
+}
+
+#[test]
+fn test_005_bfs() {
+    // 辺の重みがないときは、bfsを行うことができる
+    let graph = DirectedAdjGraph::from_edges_no_weight(5, &[(0, 1), (1, 2), (2, 3), (3, 4)]);
+
+    assert_eq!(
+        <dyn Graph::<Weight = ()>>::bfs(&graph, 0),
+        vec![0, 1, 2, 3, 4]
+    );
 }

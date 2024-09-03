@@ -9,13 +9,8 @@ fn main() {
         edges: [(u32, u32); M],
     }
 
-    let mut graph = library::graph::DirectedGraph::<()>::new(N);
-
-    for (u, v) in edges {
-        graph.add_edge(u, v, ());
-    }
-
-    let has_cycle = library::cycle_detection::cycle_detection_directed(graph);
+    let graph = library::graph::DirectedAdjGraph::from_edges_no_weight(N, &edges);
+    let has_cycle = library::cycle_detection::cycle_detection(&graph);
 
     println!("{}", if has_cycle { 1 } else { 0 });
 }
