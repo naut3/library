@@ -1,39 +1,92 @@
-pub type DirectedGraph<W> = Graph<Directed, AdjacencyList<W>>;
-pub type UndirectedGraph<W> = Graph<Undirected, AdjacencyList<W>>;
+pub type Index = u32;
 
-type Index = u32;
+pub type DirectedAdjGraph<W> = AdjGraph<Directed, W>;
+pub type UndirectedAdjGraph<W> = AdjGraph<Undirected, W>;
+
+pub trait Graph {
+    type Weight;
+    fn is_directed_edge(&self) -> bool;
+    fn size(&self) -> Index;
+    fn add_edge(&mut self, u: Index, v: Index, w: Self::Weight);
+    fn adjacent(&self, v: Index) -> &[(Index, Self::Weight)];
+}
+
+impl dyn Graph<Weight = ()> {
+    pub fn bfs(&self, src: Index) -> Vec<Index> {
+        let size = self.size();
+        let mut seen = vec![false; size as usize];
+        let mut dist = vec![Index::MAX; size as usize];
+        let mut q = std::collections::VecDeque::new();
+
+        dist[src as usize] = 0;
+        seen[src as usize] = true;
+        q.push_front(src);
+
+        while let Some(u) = q.pop_front() {
+            for &(nxt, _) in self.adjacent(u) {
+                if seen[nxt as usize] {
+                    continue;
+                }
+
+                dist[nxt as usize] = dist[u as usize] + 1;
+                seen[nxt as usize] = true;
+                q.push_back(nxt);
+            }
+        }
+
+        dist
+    }
+}
+
+pub trait DirectedGraph: Graph {}
+pub trait UndirectedGraph: Graph {}
+
+pub trait Orientation {
+    fn is_directed_edge() -> bool;
+}
+pub enum Directed {}
+impl Orientation for Directed {
+    fn is_directed_edge() -> bool {
+        true
+    }
+}
+pub enum Undirected {}
+impl Orientation for Undirected {
+    fn is_directed_edge() -> bool {
+        false
+    }
+}
 
 #[derive(Clone, PartialEq, Eq)]
-pub struct Graph<O: Orientation, R: Representation> {
-    pub size: Index,
-    representation: R,
+pub struct AdjGraph<O: Orientation, W> {
+    size: Index,
+    adj: Vec<Vec<(Index, W)>>,
     _marker: std::marker::PhantomData<O>,
 }
 
-impl<O: Orientation, R: Representation<W = W>, W: Clone + Copy> Graph<O, R> {
-    /// make a new graph with `size` vertices
+impl<O: Orientation, W: Clone + Copy> AdjGraph<O, W> {
+    /// construct a new graph, which has `size` vertices.
     pub fn new(size: Index) -> Self {
         Self {
             size,
-            representation: R::new(size),
+            adj: vec![vec![]; size as usize],
             _marker: std::marker::PhantomData,
         }
     }
 
-    /// add an edge of weight `w` between `u` and `v`
-    pub fn add_edge(&mut self, u: Index, v: Index, w: W) {
-        self.representation.add_edge(u, v, w.clone());
-
-        if O::is_directed() {
-            return;
+    /// add edge from `u` to `v` with weight `w`.
+    pub fn add_edge(&mut self, u: Index, v: Index, w: W) -> () {
+        if O::is_directed_edge() {
+            self.adj[u as usize].push((v, w));
         } else {
-            self.representation.add_edge(v, u, w);
+            self.adj[u as usize].push((v, w.clone()));
+            self.adj[v as usize].push((u, w));
         }
     }
 
-    /// enumerate vertices adjacent to vertex `v`
+    /// enumerate edges starting from vertex `v`.
     pub fn adjacent(&self, v: Index) -> &[(Index, W)] {
-        self.representation.adjacent(v)
+        &self[v]
     }
 
     pub fn from_edges(size: Index, edges: &[(Index, Index, W)]) -> Self {
@@ -45,105 +98,129 @@ impl<O: Orientation, R: Representation<W = W>, W: Clone + Copy> Graph<O, R> {
 
         graph
     }
-}
 
-impl<O: Orientation, R: Representation<W = W>, W: Clone + Copy> std::ops::Index<Index>
-    for Graph<O, R>
-{
-    type Output = [(Index, W)];
+    /// convert to CRSGraph
+    pub fn to_crs(mut self) -> CRSGraph<O, W> {
+        let mut crs = vec![];
+        let mut ptr = vec![0];
 
-    fn index(&self, index: Index) -> &Self::Output {
-        self.adjacent(index)
-    }
-}
+        for i in 0..self.size as usize {
+            crs.append(&mut self.adj[i]);
+            ptr.push(crs.len() as Index);
+        }
 
-impl<O: Orientation, W: Clone> Graph<O, AdjacencyList<W>> {
-    pub fn to_crs(self) -> Graph<O, CrsList<W>> {
-        Graph {
+        CRSGraph {
             size: self.size,
-            representation: CrsList::from(self.representation),
+            crs,
+            ptr,
             _marker: std::marker::PhantomData,
         }
     }
+
+    pub fn size(&self) -> Index {
+        self.size
+    }
+
+    pub fn is_directed_edge(&self) -> bool {
+        O::is_directed_edge()
+    }
 }
 
-pub trait Representation {
-    type W;
-    fn new(size: Index) -> Self;
-    fn adjacent(&self, v: Index) -> &[(Index, Self::W)];
-    fn add_edge(&mut self, u: Index, v: Index, w: Self::W);
+impl<O: Orientation> AdjGraph<O, ()> {
+    pub fn from_edges_no_weight(size: Index, edges: &[(Index, Index)]) -> Self {
+        let mut graph = Self::new(size);
+
+        for &(u, v) in edges {
+            graph.add_edge(u, v, ())
+        }
+
+        graph
+    }
 }
 
-#[derive(Clone, PartialEq, Eq)]
-pub struct AdjacencyList<W> {
-    list: Vec<Vec<(Index, W)>>,
+impl<O: Orientation, W> std::ops::Index<Index> for AdjGraph<O, W> {
+    type Output = [(Index, W)];
+    fn index(&self, index: Index) -> &Self::Output {
+        &self.adj[index as usize]
+    }
 }
 
-impl<W: Clone> Representation for AdjacencyList<W> {
-    type W = W;
-    fn new(size: Index) -> Self {
-        Self {
-            list: vec![vec![]; size as usize],
+impl<O: Orientation, W: Clone> Graph for AdjGraph<O, W> {
+    type Weight = W;
+    fn is_directed_edge(&self) -> bool {
+        O::is_directed_edge()
+    }
+    fn add_edge(&mut self, u: Index, v: Index, w: Self::Weight) {
+        if O::is_directed_edge() {
+            self.adj[u as usize].push((v, w));
+        } else {
+            self.adj[u as usize].push((v, w.clone()));
+            self.adj[v as usize].push((u, w));
         }
     }
-    fn adjacent(&self, v: Index) -> &[(Index, Self::W)] {
-        &self.list[v as usize]
+    fn adjacent(&self, v: Index) -> &[(Index, Self::Weight)] {
+        &self[v]
     }
-    fn add_edge(&mut self, u: Index, v: Index, w: Self::W) {
-        self.list[u as usize].push((v, w));
+    fn size(&self) -> Index {
+        self.size
     }
 }
 
-#[derive(Clone, PartialEq, Eq)]
-pub struct CrsList<W> {
-    list: Vec<(Index, W)>,
+impl<O: Orientation, W: Clone + Copy> From<AdjGraph<O, W>> for CRSGraph<O, W> {
+    fn from(graph: AdjGraph<O, W>) -> Self {
+        graph.to_crs()
+    }
+}
+
+pub struct CRSGraph<O: Orientation, W> {
+    size: Index,
+    crs: Vec<(Index, W)>,
     ptr: Vec<Index>,
+    _marker: std::marker::PhantomData<O>,
 }
 
-impl<W> From<AdjacencyList<W>> for CrsList<W> {
-    fn from(mut value: AdjacencyList<W>) -> Self {
-        let mut list = vec![];
-        let mut ptr = vec![0];
+impl<O: Orientation, W: Clone> CRSGraph<O, W> {
+    pub fn new(_size: Index) -> Self {
+        unreachable!()
+    }
 
-        let size = value.list.len();
+    pub fn add_edge(_u: Index, _v: Index, _w: W) -> () {
+        unreachable!()
+    }
 
-        for i in 0..size {
-            list.append(&mut value.list[i]);
-            ptr.push(list.len() as Index);
-        }
+    pub fn adjacent(&self, v: Index) -> &[(Index, W)] {
+        &self[v]
+    }
 
-        Self { list, ptr }
+    pub fn size(&self) -> Index {
+        self.size
+    }
+
+    pub fn is_directed_edge(&self) -> bool {
+        O::is_directed_edge()
     }
 }
 
-impl<W> Representation for CrsList<W> {
-    type W = W;
-    fn new(_size: Index) -> Self {
-        unreachable!();
-    }
-    fn adjacent(&self, v: Index) -> &[(Index, Self::W)] {
-        &self.list[self.ptr[v as usize] as usize..self.ptr[v as usize + 1] as usize]
-    }
-    fn add_edge(&mut self, _u: Index, _v: Index, _w: Self::W) {
-        unreachable!();
+impl<O: Orientation, W> std::ops::Index<Index> for CRSGraph<O, W> {
+    type Output = [(Index, W)];
+    fn index(&self, index: Index) -> &Self::Output {
+        let v = index as usize;
+        &self.crs[self.ptr[v] as usize..self.ptr[v + 1] as usize]
     }
 }
 
-/// type marker of edges orientation
-pub trait Orientation {
-    fn is_directed() -> bool;
-}
-
-pub enum Directed {}
-impl Orientation for Directed {
-    fn is_directed() -> bool {
-        true
+impl<O: Orientation, W: Clone> Graph for CRSGraph<O, W> {
+    type Weight = W;
+    fn is_directed_edge(&self) -> bool {
+        O::is_directed_edge()
     }
-}
-
-pub enum Undirected {}
-impl Orientation for Undirected {
-    fn is_directed() -> bool {
-        false
+    fn add_edge(&mut self, _u: Index, _v: Index, _w: Self::Weight) {
+        unreachable!()
+    }
+    fn adjacent(&self, v: Index) -> &[(Index, Self::Weight)] {
+        &self[v]
+    }
+    fn size(&self) -> Index {
+        self.size
     }
 }
