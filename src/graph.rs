@@ -3,6 +3,9 @@ pub type Index = u32;
 pub type DirectedAdjGraph<W> = AdjGraph<Directed, W>;
 pub type UndirectedAdjGraph<W> = AdjGraph<Undirected, W>;
 
+pub trait DirectedGraph: Graph {}
+pub trait UndirectedGraph: Graph {}
+
 pub trait Graph {
     type Weight;
     fn is_directed_edge(&self) -> bool;
@@ -37,9 +40,6 @@ impl dyn Graph<Weight = ()> {
         dist
     }
 }
-
-pub trait DirectedGraph: Graph {}
-pub trait UndirectedGraph: Graph {}
 
 pub trait Orientation {
     fn is_directed_edge() -> bool;
@@ -172,6 +172,9 @@ impl<O: Orientation, W: Clone + Copy> From<AdjGraph<O, W>> for CRSGraph<O, W> {
     }
 }
 
+impl<W: Clone> DirectedGraph for AdjGraph<Directed, W> {}
+impl<W: Clone> UndirectedGraph for AdjGraph<Undirected, W> {}
+
 pub struct CRSGraph<O: Orientation, W> {
     size: Index,
     crs: Vec<(Index, W)>,
@@ -224,3 +227,6 @@ impl<O: Orientation, W: Clone> Graph for CRSGraph<O, W> {
         self.size
     }
 }
+
+impl<W: Clone> DirectedGraph for CRSGraph<Directed, W> {}
+impl<W: Clone> UndirectedGraph for CRSGraph<Undirected, W> {}
