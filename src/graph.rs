@@ -5,6 +5,36 @@ pub type UndirectedAdjGraph<W> = AdjGraph<Undirected, W>;
 
 pub trait DirectedGraph: Graph {}
 pub trait UndirectedGraph: Graph {}
+pub trait Tree: Graph {}
+
+impl<W: Default + std::ops::Add<Output = W> + Copy> dyn Tree<Weight = W> {
+    pub fn dist(&self, src: Index) -> Vec<W> {
+        let size = self.size() as usize;
+        let mut dist = vec![W::default(); size];
+        let mut seen = vec![false; size];
+
+        let mut q = std::collections::VecDeque::new();
+
+        q.push_front(src);
+        seen[src as usize] = true;
+
+        while let Some(u) = q.pop_front() {
+            let d = dist[u as usize];
+
+            for &(v, w) in self.adjacent(u) {
+                if seen[v as usize] {
+                    continue;
+                }
+
+                q.push_front(v);
+                seen[v as usize] = true;
+                dist[v as usize] = d + w;
+            }
+        }
+
+        dist
+    }
+}
 
 pub trait Graph {
     type Weight;
@@ -174,6 +204,7 @@ impl<O: Orientation, W: Clone + Copy> From<AdjGraph<O, W>> for CRSGraph<O, W> {
 
 impl<W: Clone> DirectedGraph for AdjGraph<Directed, W> {}
 impl<W: Clone> UndirectedGraph for AdjGraph<Undirected, W> {}
+impl<W: Clone> Tree for AdjGraph<Undirected, W> {}
 
 pub struct CRSGraph<O: Orientation, W> {
     size: Index,
@@ -230,3 +261,4 @@ impl<O: Orientation, W: Clone> Graph for CRSGraph<O, W> {
 
 impl<W: Clone> DirectedGraph for CRSGraph<Directed, W> {}
 impl<W: Clone> UndirectedGraph for CRSGraph<Undirected, W> {}
+impl<W: Clone> Tree for CRSGraph<Undirected, W> {}
