@@ -1,13 +1,108 @@
+//! グラフを表現するトレイト・構造体を定義する。
+//!
+//! ## Usage
+//! まず、隣接リストで表現されたグラフ [`AdjGraph`] を生成する。型エイリアスとして有向グラフは [`DirectedAdjGraph<W>`] が、無向グラフは [`UndirectedAdjGraph<W>`] があるので、それらを利用すると便利である。  
+//! 具体的には、[`DirectedAdjGraph::new()`] や [`UndirectedAdjGraph::from_edges()`] などを利用すると良い。
+//!
+//! これらをそのまま使用することもできるが、キャッシュを考慮した別のメモリレイアウト [`CRSGraph`] に変換することもできる。[`AdjGraph::to_crs()`] でその変換を行える。  
+//!
+//! 実際の利用例としては、[Examples](#examples) の項を参考にするとよい。
+//!
+//! ## Examples
+//!
+//! 有向グラフを生成して、隣接辺を列挙する
+//!
+//! ```
+//! use library::graph::DirectedAdjGraph;
+//!
+//! // 頂点数が 5 の有向グラフを隣接リスト形式で表す
+//! let mut graph = DirectedAdjGraph::new(5);
+//! // add_edge(u, v, w) の形で u --> v 間に重み w の辺を追加できる
+//! graph.add_edge(0, 1, 1u32);
+//! graph.add_edge(1, 2, 10);
+//! graph.add_edge(3, 0, 100);
+//! graph.add_edge(1, 4, 1000);
+//!
+//! // graph は有向グラフなので、3 --> 0 の辺は 0 の隣接辺ではない
+//! assert_eq!(graph.adjacent(0), &vec![(1, 1)]);
+//! // 添字によるアクセスもできる
+//! assert_eq!(&graph[1], &vec![(2, 10), (4, 1000)]);
+//! ```
+//!
+//! 重みなし無向グラフを生成して、最短距離を計算する
+//!
+//! ```
+//! use library::graph::{Graph, UndirectedAdjGraph};
+//!
+//! let graph =
+//!     UndirectedAdjGraph::from_edges_no_weight(6, &[(0, 1), (1, 2), (2, 0), (2, 4), (5, 4)]);
+//! assert_eq!(&graph[2], vec![(1, ()), (0, ()), (4, ())]);
+//!
+//! // 同じグラフを保ったままメモリレイアウトを変更することもできる
+//! let graph = graph.to_crs();
+//! assert_eq!(&graph[4], vec![(2, ()), (5, ())]);
+//!
+//! let dist = <dyn Graph<Weight = ()>>::bfs(&graph, 0);
+//! // 到達不可能な頂点の距離は `u32::MAX` になることに注意する
+//! assert_eq!(dist, vec![0, 1, 1, u32::MAX, 2, 3]);
+//! ```
+//!
+//! 木を生成して、最短距離を計算する
+//!
+//! * 与えられたグラフが木であることを確認せずに動作してしまうことに注意する。
+//!
+//! ```
+//! use library::graph::{Tree, UndirectedAdjGraph};
+//!
+//! let graph = UndirectedAdjGraph::from_edges(
+//!     6,
+//!     &[
+//!         (0, 1, 1),
+//!         (2, 1, 10),
+//!         (0, 3, 100),
+//!         (4, 2, 1000),
+//!         (2, 5, 10000),
+//!     ],
+//! );
+//!
+//! let dist = <dyn Tree<Weight = u32>>::dist(&graph, 0);
+//! assert_eq!(dist, vec![0, 1, 11, 100, 1011, 10011]);
+//! ```
+//!
+
+/// グラフの添字は `u32` で管理している
 pub type Index = u32;
 
+/// 有向グラフを隣接リスト形式で表現する構造体
 pub type DirectedAdjGraph<W> = AdjGraph<Directed, W>;
+
+/// 無向グラフを隣接リスト形式で表現する構造体
 pub type UndirectedAdjGraph<W> = AdjGraph<Undirected, W>;
 
+/// 有向グラフであることを示すトレイト
 pub trait DirectedGraph: Graph {}
+
+/// 無向グラフであることを示すトレイト
 pub trait UndirectedGraph: Graph {}
+
+/// (無向)木であることを示すトレイト
 pub trait Tree: Graph {}
 
 impl<W: Default + std::ops::Add<Output = W> + Copy> dyn Tree<Weight = W> {
+    /// 木上で幅優先探索を行って、始点 `src` から他の頂点への最短距離を計算する。
+    ///
+    /// ## Example
+    ///
+    /// ```
+    /// use library::graph::{Tree, UndirectedAdjGraph};
+    ///
+    /// let graph =
+    ///     UndirectedAdjGraph::from_edges(5, &[(0, 1, 1), (1, 2, 10), (3, 0, 100), (0, 4, 1000)]);
+    /// let dist = <dyn Tree<Weight = u32>>::dist(&graph, 1);
+    ///
+    /// assert_eq!(dist, vec![1, 0, 10, 101, 1001]);
+    /// ```
+    ///
     pub fn dist(&self, src: Index) -> Vec<W> {
         let size = self.size() as usize;
         let mut dist = vec![W::default(); size];
@@ -37,10 +132,15 @@ impl<W: Default + std::ops::Add<Output = W> + Copy> dyn Tree<Weight = W> {
 }
 
 pub trait Graph {
+    /// 辺の重みの型を設定する
     type Weight;
+    /// 自身の辺が有向辺かどうかを返す
     fn is_directed_edge(&self) -> bool;
+    /// 自身の頂点数を返す
     fn size(&self) -> Index;
+    /// `u` から `v` へ重み `w` の辺を新たに追加する
     fn add_edge(&mut self, u: Index, v: Index, w: Self::Weight);
+    /// `v` から出ている辺を列挙する
     fn adjacent(&self, v: Index) -> &[(Index, Self::Weight)];
 }
 
@@ -71,9 +171,12 @@ impl dyn Graph<Weight = ()> {
     }
 }
 
+/// 辺が有向か無向かを指し示す型マーカー
+/// `Directed` か `Undirected` のいずれかである。
 pub trait Orientation {
     fn is_directed_edge() -> bool;
 }
+
 pub enum Directed {}
 impl Orientation for Directed {
     fn is_directed_edge() -> bool {
@@ -206,6 +309,7 @@ impl<W: Clone> DirectedGraph for AdjGraph<Directed, W> {}
 impl<W: Clone> UndirectedGraph for AdjGraph<Undirected, W> {}
 impl<W: Clone> Tree for AdjGraph<Undirected, W> {}
 
+#[derive(Clone, PartialEq, Eq)]
 pub struct CRSGraph<O: Orientation, W> {
     size: Index,
     crs: Vec<(Index, W)>,
