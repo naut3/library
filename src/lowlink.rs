@@ -1,5 +1,30 @@
 use crate::graph::UndirectedGraph;
 
+/// [`LowLink`] は、連結グラフ $`G = (V, E)`$ の関節点や橋を $`O(|V| + |E|)`$ で検出することができる。  
+///
+/// * 連結グラフ $`G = (V, E)`$ で頂点 $`v \in V`$ とそれから伸びている辺を取り除くと、グラフが非連結になるとき、その頂点 $`v`$ は関節点であるという。
+/// * 連結グラフ $`G = (V, E)`$ で辺 $`e \in E`$ を取り除くと、グラフが非連結になるとき、その辺 $`e`$ は橋であるという。
+///
+/// ## Examples
+///
+/// ```
+/// use library::graph::UndirectedAdjGraph;
+/// use library::lowlink::LowLink;
+///
+/// let graph =
+///     UndirectedAdjGraph::from_edges_no_weight(5, &[(0, 1), (1, 2), (2, 0), (1, 3), (4, 3)]);
+/// let lowlink = LowLink::from(&graph);
+///
+/// assert_eq!(lowlink.articulation_points(), [3, 1]);
+/// assert_eq!(lowlink.bridges(), [(3, 4), (1, 3)]);
+/// ```
+///
+/// ## Verified problems
+///
+/// * [Articulation Points](../../src/aoj_grl_3_a/aoj_grl_3_a.rs.html)
+/// * [Bridges](../../src/aoj_grl_3_b/aoj_grl_3_b.rs.html)
+///
+
 pub struct LowLink {
     seen: Vec<bool>,
     ord: Vec<u32>,
@@ -11,7 +36,7 @@ pub struct LowLink {
 impl LowLink {
     const ROOT: u32 = 1 << 30;
 
-    /// construct a `LowLink` from given `graph`
+    /// `graph` を受け取って、関節点、橋を求める。
     pub fn from(graph: &impl UndirectedGraph) -> Self {
         let size = graph.size();
         let mut lowlink = Self {
@@ -77,10 +102,12 @@ impl LowLink {
         }
     }
 
+    /// 求めた関節点を列挙する。
     pub fn articulation_points(&self) -> &[u32] {
         &self.articulation_points
     }
 
+    /// 求めた橋を列挙する。
     pub fn bridges(&self) -> &[(u32, u32)] {
         &self.bridges
     }
