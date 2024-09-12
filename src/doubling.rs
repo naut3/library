@@ -51,7 +51,7 @@ impl Doubling {
     pub fn build(nxt: &[Index], depth: Index) -> Self {
         let size = nxt.len();
 
-        let mut dp = nxt.clone().to_vec();
+        let mut dp = nxt.to_vec();
         dp.append(&mut vec![0; size * depth as usize]);
 
         for d in 0..depth as usize {
