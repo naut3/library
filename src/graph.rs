@@ -1,7 +1,9 @@
 //! グラフを表現するトレイト・構造体を定義する。
 //!
 //! ## Usage
-//! まず、隣接リストで表現されたグラフ [`AdjGraph`] を生成する。型エイリアスとして有向グラフは [`DirectedAdjGraph<W>`] が、無向グラフは [`UndirectedAdjGraph<W>`] があるので、それらを利用すると便利である。  
+//! まず、隣接リストで表現されたグラフ [`AdjGraph`] を生成する。
+//! 
+//! 型エイリアスとして有向グラフは [`DirectedAdjGraph<W>`] が、無向グラフは [`UndirectedAdjGraph<W>`] があるので、それらを利用すると便利である。  
 //! 具体的には、[`DirectedAdjGraph::new()`] や [`UndirectedAdjGraph::from_edges()`] などを利用すると良い。
 //!
 //! これらをそのまま使用することもできるが、キャッシュを考慮した別のメモリレイアウト [`CRSGraph`] に変換することもできる。[`AdjGraph::to_crs()`] でその変換を行える。  
