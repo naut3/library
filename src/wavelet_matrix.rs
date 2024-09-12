@@ -1,3 +1,65 @@
+/// [`WaveletMatrix`] は事前にデータ構造を構築することで、区間内の $`k`$ 番目に小さい要素や、$`a`$ 以上 $`b`$ 以下の要素の数などを高速に求めることができる
+///
+/// ## Examples
+///
+/// 以下は、[`WaveletMatrix`] を構築して、`quantile`, `range_freq` 系のクエリに応える例である。
+///
+/// ```
+/// use library::wavelet_matrix::WaveletMatrix;
+///
+/// let wm: WaveletMatrix<()> = WaveletMatrix::from(&[3, 1, 4, 1, 5, 9], 4);
+///
+/// assert_eq!(wm.access(2), 4);
+/// assert_eq!(wm.access(4), 5);
+///
+/// // 区間 [2, 5) で 0, 1, 2 番目に小さい要素
+/// // [4, 1, 5] を整列して [1, 4, 5]
+/// assert_eq!(
+///     [
+///         wm.quantile(2, 5, 0),
+///         wm.quantile(2, 5, 1),
+///         wm.quantile(2, 5, 2)
+///     ],
+///     [1, 4, 5]
+/// );
+///
+/// assert_eq!(wm.range_freq(0, 4, 2), 2); // 区間 [0, 4) で 2 未満の要素 -> 1 が 2 個
+/// assert_eq!(wm.range_freq(2, 6, 5), 2); // 区間 [2, 6) で 5 未満の要素 -> 1, 4 が 1 個
+/// ```
+///
+/// また、[`WaveletMatrix`] を拡張したものを利用して、条件がついた区間和を計算することができる。次にその例を示す。
+///
+/// ```
+/// use library::wavelet_matrix::WaveletMatrix;
+///
+/// let wm = WaveletMatrix::from_weighted(
+///     &[
+///         (9, 1u32),
+///         (9, 10),
+///         (8, 100),
+///         (2, 1_000),
+///         (4, 10_000),
+///         (4, 100_000),
+///         (3, 1_000_000),
+///         (5, 10_000_000),
+///         (3, 100_000_000),
+///     ],
+///     4,
+/// );
+///
+/// assert_eq!(wm.range_sum(1, 5, 9), 11_100); // 区間 [1, 5) で 9 未満の要素についた重みの和
+/// assert_eq!(wm.range_sum(2, 7, 4), 1_001_000); // 区間 [2, 7) で 4 未満の要素についた重みの和
+/// ```
+///
+/// ## 計算量
+///
+/// \[TODO\] word-RAM としての解析を書くべきだが、面倒なので後回しにする
+///
+/// ## Verified problems
+///
+/// * [Static Range Sum](../../src/lc_static_range_sum_03/lc_static_range_sum_03.rs.html)
+/// * [Range Kth Smallest](../../src/lc_range_kth_smallest/lc_range_kth_smallest.rs.html)
+///
 pub struct WaveletMatrix<T> {
     bvs: Vec<BitVector>,
     length: usize,
@@ -6,7 +68,7 @@ pub struct WaveletMatrix<T> {
 }
 
 impl WaveletMatrix<()> {
-    /// 総和系クエリを利用しない場合のWavelet Matrixを構築する
+    /// 重み付きでない WaveletMatrix を構築する
     pub fn from(array: &[u64], height: usize) -> Self {
         let mut bvs = vec![];
         let mut array = array.to_vec();
@@ -324,12 +386,12 @@ impl BitVector {
     }
 
     /// i bit 目の値を返す (i は 0 以上)
-    pub fn access(&self, i: usize) -> bool {
+    fn access(&self, i: usize) -> bool {
         (self.row[i / 64] >> (i % 64)) & 1 == 1
     }
 
     /// i bit 目までの b の数を数える (0 bit 目の存在に注意)
-    pub fn rank(&self, i: usize, b: bool) -> u32 {
+    fn rank(&self, i: usize, b: bool) -> u32 {
         if i % 64 == 63 {
             let c = self.cs[i / 64 + 1];
 
