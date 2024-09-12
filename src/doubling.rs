@@ -30,8 +30,8 @@ pub type Index = u32;
 ///
 /// | 関数 | 概要 | 計算量 |
 /// | --- | --- | --- |
-/// | `build(nxt, depth)` | $`2`$ のべき乗回移動した先を $`2^{\text{depth}}`$ 回先のものまで事前に計算する | $`O(\lvert \text{nxt} \rvert \times \text{depth})`$ |
-/// | `self.next(src, k)` | `src` から `k` 回移動した先を求める | $`O(\text{self.depth})`$ |
+/// | `build(nxt, depth)` | 事前計算を行い、データ構造を構築する | $`O(\lvert \text{nxt} \rvert \cdot \text{depth})`$ |
+/// | `self.next(src, k)` | `src` から $`k`$ 回移動した先を求める | $`O(\text{self.depth})`$ |
 /// | `self.jump_power_of_two(src, k)` | `src` から $`2^k`$ 回移動した先を求める | $`O(1)`$ |
 ///
 /// ## Verified problems
