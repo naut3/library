@@ -1,19 +1,35 @@
+//! 代数的な構造を表現するトレイト・構造体を定義する。
+//!   
+//! それぞれ、例えば結合法則を満たしていることを保証するような機構はないので、特にその場で定義しないといけない場合、自分でそれが条件を満たしていることを確認する必要がある。
+//!
+//! * [`SemiGroup`]
+//! * [`Band`]
+//! * [`Monoid`]
+//!
+
 /// 半群
 pub trait SemiGroup {
+    /// 集合
     type S;
+    /// 二項演算
     fn op(lhs: &Self::S, rhs: &Self::S) -> Self::S;
 }
 
 /// 帯(冪等半群)
 pub trait Band {
+    /// 集合
     type S;
+    /// 二項演算
     fn op(lhs: &Self::S, rhs: &Self::S) -> Self::S;
 }
 
 /// モノイド
 pub trait Monoid {
+    /// 集合
     type S;
+    /// 二項演算
     fn op(lhs: &Self::S, rhs: &Self::S) -> Self::S;
+    /// 二項演算の単位元
     const E: Self::S;
 }
 

@@ -5,6 +5,7 @@
 //! * [累積和](cumulative_sum/struct.CumulativeSum.html)
 //! * [Binary Indexed Tree](binary_indexed_tree/struct.BinaryIndexedTree.html)
 //! * [Wavelet Matrix](wavelet_matrix/struct.WaveletMatrix.html)
+//! * [Sparse Table](sparse_table/struct.SparseTable.html)
 //!  
 //! ## グラフ
 //!
@@ -21,10 +22,10 @@
 //! * [Rolling Hash](rolling_hash/struct.RollingHash.html)
 //!
 //! ## それ以外のアルゴリズム・データ構造
-//!  
+//!
+//! * [代数的構造の構造体・トレイト](algebra/index.html)
 //! * [Union-Find](unionfind/struct.UnionFind.html)
 //! * [ダブリング](doubling/struct.Doubling.html)
-//!
 //!
 
 pub mod algebra;
