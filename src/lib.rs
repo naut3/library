@@ -15,6 +15,10 @@
 //! ## 木
 //!
 //! * [木の直径](tree_diameter/fn.tree_diameter.html)
+//! 
+//! ## 文字列
+//! 
+//! * [Rolling Hash](rolling_hash/struct.RollingHash.html)
 //!
 //! ## それ以外のアルゴリズム・データ構造
 //!  
@@ -31,6 +35,7 @@ pub mod doubling;
 pub mod graph;
 pub mod integer_traits;
 pub mod lowlink;
+pub mod rolling_hash;
 pub mod tree_diameter;
 pub mod unionfind;
 pub mod wavelet_matrix;
