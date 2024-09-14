@@ -60,7 +60,9 @@ impl<W> Diameter<W> {
 /// ## Verified problems
 ///
 /// * [Tree Diameter](../../src/lc_tree_diameter/lc_tree_diameter.rs.html)
-/// 
+/// * [Diameter of a Tree](../../src/aoj_grl_5_a/aoj_grl_5_a.rs.html)
+/// * [Height of a Tree](../../src/aoj_grl_5_b/aoj_grl_5_b.rs.html)
+///
 pub fn tree_diameter<W: Default + Copy + Ord + std::ops::Add<Output = W>>(
     tree: &dyn Tree<Weight = W>,
 ) -> Diameter<W> {
