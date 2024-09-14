@@ -69,7 +69,7 @@ impl<B: Band<S = S>, S: Clone + Copy> SparseTable<B> {
         let mut table = array.to_vec();
 
         for _ in 1..height {
-            table.append(&mut array.clone().to_vec());
+            table.append(&mut array.to_vec());
         }
 
         let flatten = |y: usize, x: usize| y * size + x;
