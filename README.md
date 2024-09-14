@@ -9,10 +9,10 @@ Documentation: https://naut3.github.io/library/library/index.html
 
 * 使用例
 
-以下は、`src/bin/main.rs` に `src/dijkstra.rs` とそれが依存しているモジュールを展開する。
+以下は、`src/bin/example.rs` に `src/dijkstra.rs` とそれが依存しているモジュールを展開する。
 
 ```bash
-python3 bundle.py main dijkstra
+python3 bundle.py example dijkstra
 ```
 
 `python3 bundle.py {展開先のファイル} {モジュール1} {モジュール2} ...` の形で、モジュール1, モジュール2, ... とそれらが依存しているモジュールを展開先のファイルに展開する。
