@@ -4,6 +4,7 @@
 //!
 //! * [累積和](cumulative_sum/struct.CumulativeSum.html)
 //! * [Binary Indexed Tree](binary_indexed_tree/struct.BinaryIndexedTree.html)
+//! * [動的Binary Indexed Tree](dynamic_binary_indexed_tree/struct.DynamicBinaryIndexedTree.html)
 //! * [Wavelet Matrix](wavelet_matrix/struct.WaveletMatrix.html)
 //! * [Sparse Table](sparse_table/struct.SparseTable.html)
 //!  
@@ -34,6 +35,7 @@ pub mod cumulative_sum;
 pub mod cycle_detection;
 pub mod dijkstra;
 pub mod doubling;
+pub mod dynamic_binary_indexed_tree;
 pub mod graph;
 pub mod integer_traits;
 pub mod lowlink;
