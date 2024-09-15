@@ -13,6 +13,7 @@
 //! * [グラフのための構造体・トレイト](graph/index.html)
 //! * [Dijkstra法](dijkstra/index.html)
 //! * [LowLink(橋・関節点)](lowlink/struct.LowLink.html)
+//! * [強連結成分分解](scc/fn.strongly_connected_components.html)
 //!
 //! ## 木
 //!
@@ -40,6 +41,7 @@ pub mod graph;
 pub mod integer_traits;
 pub mod lowlink;
 pub mod rolling_hash;
+pub mod scc;
 pub mod sparse_table;
 pub mod tree_diameter;
 pub mod unionfind;
