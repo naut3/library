@@ -26,6 +26,7 @@
 //! ## それ以外のアルゴリズム・データ構造
 //!
 //! * [代数的構造の構造体・トレイト](algebra/index.html)
+//! * [ModInt](modint/struct.ModInt.html)
 //! * [Union-Find](unionfind/struct.UnionFind.html)
 //! * [ダブリング](doubling/struct.Doubling.html)
 //!
@@ -40,6 +41,7 @@ pub mod dynamic_binary_indexed_tree;
 pub mod graph;
 pub mod integer_traits;
 pub mod lowlink;
+pub mod modint;
 pub mod rolling_hash;
 pub mod scc;
 pub mod sparse_table;
