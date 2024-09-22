@@ -24,7 +24,7 @@ const NONE: u32 = u32::MAX;
 /// assert!(bt.contains(0b0101));
 /// assert!(!bt.contains(0b1011));
 ///
-/// bt.delete(0b0101);
+/// bt.remove(0b0101);
 /// assert!(!bt.contains(0b0101));
 ///
 /// bt.insert(0b1001);
