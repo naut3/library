@@ -29,10 +29,12 @@
 //! * [ModInt](modint/struct.ModInt.html)
 //! * [Union-Find](unionfind/struct.UnionFind.html)
 //! * [ダブリング](doubling/struct.Doubling.html)
+//! * [Binary Trie](binary_trie/struct.MultiBinaryTrie.html)
 //!
 
 pub mod algebra;
 pub mod binary_indexed_tree;
+pub mod binary_trie;
 pub mod cumulative_sum;
 pub mod cycle_detection;
 pub mod dijkstra;
