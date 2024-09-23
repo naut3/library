@@ -100,6 +100,8 @@ impl<
 
     /// `T` の和に単調性がある場合にのみ機能する。($`s + a \geq s`$がすべての$`a \in T`$に対して成り立つ)  
     ///
+    /// $`\displaystyle \text{PrefixSum}(i) = \sum_{j < i} \text{self} \lbrack j \rbrack`$ とする。(値域は$`0, 1, \dots, \text{self.size}`$)  
+    /// $`\text{PrefixSum}(i) \leq w`$ を満たす最大の $`i`$ を返す
     ///
     /// 参考: <https://qiita.com/ngtkana/items/7d50ff180a4e5c294cb7#%E6%A7%8B%E7%AF%89>
     pub fn upper_bound(&self, w: T) -> usize {
