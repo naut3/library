@@ -37,6 +37,7 @@
 /// ## Verified problems
 ///
 /// * [Static Range Sum](../../src/lc_static_range_sum_02/lc_static_range_sum_02.rs.html)
+/// * [Predecessor Problem](../../src/lc_predecessor_problem_02/lc_predecessor_problem_02.rs.html)
 ///
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct BinaryIndexedTree<T> {
@@ -45,8 +46,16 @@ pub struct BinaryIndexedTree<T> {
     pub size: usize,
 }
 
-impl<T: Default + Clone + Copy + std::ops::AddAssign + std::ops::Sub<Output = T>>
-    BinaryIndexedTree<T>
+impl<
+        T: Default
+            + Clone
+            + Copy
+            + PartialOrd
+            + Ord
+            + std::ops::AddAssign
+            + std::ops::Sub<Output = T>
+            + std::ops::Add<Output = T>,
+    > BinaryIndexedTree<T>
 {
     /// 要素数が `size` で各要素が `T::default()` である `BinaruIndexedTree<T>` を生成する。
     pub fn new(size: usize) -> Self {
@@ -64,7 +73,7 @@ impl<T: Default + Clone + Copy + std::ops::AddAssign + std::ops::Sub<Output = T>
 
     /// $`\displaystyle \sum_{0 \leq j \leq i} \text{self} \lbrack j \rbrack`$ を計算する。
     pub fn prefix_sum(&self, i: usize) -> T {
-        assert!(i < self.size);
+        assert!(i < self.size, "size = {}, index = {}", self.size, i);
         self._sum(i + 1)
     }
 
@@ -89,6 +98,53 @@ impl<T: Default + Clone + Copy + std::ops::AddAssign + std::ops::Sub<Output = T>
         }
     }
 
+    /// `T` の和に単調性がある場合にのみ機能する。($`s + a \geq s`$がすべての$`a \in T`$に対して成り立つ)  
+    ///
+    ///
+    /// 参考: <https://qiita.com/ngtkana/items/7d50ff180a4e5c294cb7#%E6%A7%8B%E7%AF%89>
+    pub fn upper_bound(&self, w: T) -> usize {
+        let mut d = self.tree.len().next_power_of_two() / 2;
+        let mut j = 0;
+        let mut u = T::default();
+
+        while d != 0 {
+            if j + d < self.tree.len() {
+                let v = u + self.tree[j + d];
+
+                if v <= w {
+                    u = v;
+                    j += d;
+                }
+            }
+
+            d /= 2;
+        }
+
+        j
+    }
+
+    /// 配列 `array` から `BinaryIndexedTree` を構築する
+    ///
+    /// 参考: <https://qiita.com/ngtkana/items/7d50ff180a4e5c294cb7#%E6%A7%8B%E7%AF%89>
+    pub fn from(array: &[T]) -> Self {
+        let mut tree = vec![T::default(); array.len() + 1];
+
+        for i in 1..tree.len() {
+            let x = array[i - 1];
+            tree[i] += x;
+            let j = i + (i & i.wrapping_neg());
+            if j < tree.len() {
+                let v = tree[i];
+                tree[j] += v;
+            }
+        }
+
+        Self {
+            tree,
+            size: array.len(),
+        }
+    }
+
     fn _add(&mut self, mut i: usize, w: T) {
         while i < self.tree.len() {
             self.tree[i] += w;
@@ -110,9 +166,12 @@ impl<
         T: Default
             + Clone
             + Copy
+            + PartialOrd
+            + Ord
             + std::ops::AddAssign
             + std::ops::Sub<Output = T>
-            + std::fmt::Display,
+            + std::fmt::Display
+            + std::ops::Add<Output = T>,
     > std::fmt::Display for BinaryIndexedTree<T>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

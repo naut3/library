@@ -62,7 +62,7 @@ const NONE: u32 = u32::MAX;
 /// ## Verified problems
 ///
 /// * [Binary Search](../../src/aoj_itp2_6_a/aoj_itp2_6_a.rs.html)
-/// * [Predecessor Problem](../../src/lc_predecessor_problem/lc_predecessor_problem.rs.html)
+/// * [Predecessor Problem](../../src/lc_predecessor_problem_01/lc_predecessor_problem_01.rs.html)
 /// * [Set Xor-Min](../../src/lc_set_xor_min/lc_set_xor_min.rs.html)
 ///
 #[derive(Clone)]
@@ -107,7 +107,7 @@ impl<const D: u8> MultiBinaryTrie<D> {
 
     /// $`x`$ を一つ削除する
     ///
-    /// 削除できる、つまり実行前に $`x`$ を含んでいる場合 `true` を返す
+    /// 削除できる、つまり実行前に $`x`$ を含んでいる場合 `true` を返す  
     /// そうでない場合 `false` を返す
     pub fn remove(&mut self, x: u64) -> bool {
         if !self.contains(x) {
@@ -227,7 +227,7 @@ impl<const D: u8> MultiBinaryTrie<D> {
         Some(value)
     }
 
-    /// $`\min_{e \in \text{self}} e \text{XOR} x`$ を求める
+    /// $`\displaystyle \min_{e \in \text{self}}(e \text{XOR} x)`$ を求める
     pub fn xor_min(&self, x: u64) -> Option<u64> {
         if self.all_count() == 0 {
             return None;
