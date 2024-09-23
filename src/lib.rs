@@ -30,6 +30,7 @@
 //! * [Union-Find](unionfind/struct.UnionFind.html)
 //! * [ダブリング](doubling/struct.Doubling.html)
 //! * [Binary Trie](binary_trie/struct.MultiBinaryTrie.html)
+//! * [Fast Set](fastset/struct.FastSet.html)
 //!
 
 pub mod algebra;
@@ -40,6 +41,7 @@ pub mod cycle_detection;
 pub mod dijkstra;
 pub mod doubling;
 pub mod dynamic_binary_indexed_tree;
+pub mod fastset;
 pub mod graph;
 pub mod integer_traits;
 pub mod lowlink;
