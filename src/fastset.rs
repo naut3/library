@@ -75,15 +75,6 @@ impl FastSet {
         let tree = vec![0; length];
         let height = ptr.len() - 1;
 
-        eprintln!(
-            "{} | {}",
-            tree.len(),
-            ptr.iter()
-                .map(|x| x.to_string())
-                .collect::<Vec<_>>()
-                .join(" ")
-        );
-
         Self {
             tree,
             ptr,
