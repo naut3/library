@@ -30,7 +30,16 @@
 ///
 /// ## 計算量
 ///
-/// 初期化時に指定する要素の数 `size` に対して、$`O(\log{\text{size}})`$ になる。
+/// 内部では、64分木を構築している。そのため、空間計算量、時間計算量共に二分探索木と変わらない。
+///
+/// | 関数 | 概要 | 計算量 |
+/// | --- | --- | --- |
+/// | `new(size)` | $`0, 1, \dots, \text{size} - 1`$ を保持することができる空の集合を生成する | $`O(\text{size})`$ |
+/// | `self.insert(i)` | $`i`$ を追加する | $`O(\log(\text{self.size}))`$ |
+/// | `self.remove(i)` | $`i`$ を削除する | $`O(\log(\text{self.size}))`$ |
+/// | `self.contains(i)` | $`i`$ が含まれているかを検索する  | $`O(\log(\text{self.size}))`$ |
+/// | `self.next(i)` | $`i`$ 以上の要素で最小の要素を検索する  | $`O(\log(\text{self.size}))`$ |
+/// | `self.prev(i)` | $`i`$ 以上の要素で最小の要素を検索する  | $`O(\log(\text{self.size}))`$ |
 ///
 /// ## Verified problems
 ///
@@ -65,6 +74,15 @@ impl FastSet {
 
         let tree = vec![0; length];
         let height = ptr.len() - 1;
+
+        eprintln!(
+            "{} | {}",
+            tree.len(),
+            ptr.iter()
+                .map(|x| x.to_string())
+                .collect::<Vec<_>>()
+                .join(" ")
+        );
 
         Self {
             tree,
@@ -163,5 +181,18 @@ impl FastSet {
         }
 
         return None;
+    }
+}
+
+impl Default for FastSet {
+    /// 大きさを $`2^{24}`$ に設定した `FastSet`を生成する  
+    /// 64分木の構築を行わないので、その分少しだけ高速になっている
+    fn default() -> Self {
+        Self {
+            tree: vec![0; 266305],
+            ptr: vec![0, 262144, 266240, 266304, 266305],
+            size: 1 << 24,
+            height: 4,
+        }
     }
 }
