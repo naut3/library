@@ -45,7 +45,7 @@ impl<T: Default + std::ops::AddAssign + Copy> DynamicBinaryIndexedTree<T> {
     /// `[0; size]` で初期化する
     pub fn new(size: usize) -> Self {
         Self {
-            tree: Map::new(),
+            tree: Map::default(),
             size,
         }
     }
