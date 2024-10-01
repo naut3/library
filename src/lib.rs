@@ -52,5 +52,6 @@ pub mod rolling_hash;
 pub mod scc;
 pub mod sparse_table;
 pub mod tree_diameter;
+pub mod tsp;
 pub mod unionfind;
 pub mod wavelet_matrix;
