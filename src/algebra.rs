@@ -26,7 +26,9 @@ pub trait Band {
 /// モノイド
 pub trait Monoid {
     /// 集合
-    type S;
+    ///
+    /// `Clone`, `PartialEq`, `Eq` が要求される (`Clone` が可能かは実装寄りの問題だから置いておくとして、`Eq` が要求されるのが不自然な状況はあるのだろうか？よく分からない)
+    type S: Clone + PartialEq + Eq;
     /// 二項演算
     fn op(lhs: &Self::S, rhs: &Self::S) -> Self::S;
     /// 二項演算の単位元
