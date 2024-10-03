@@ -5,6 +5,7 @@
 //! * [累積和](cumulative_sum/struct.CumulativeSum.html)
 //! * [Binary Indexed Tree](binary_indexed_tree/struct.BinaryIndexedTree.html)
 //! * [動的Binary Indexed Tree](dynamic_binary_indexed_tree/struct.DynamicBinaryIndexedTree.html)
+//! * [Segment Tree](segtree/struct.SegmentTree.html)
 //! * [Wavelet Matrix](wavelet_matrix/struct.WaveletMatrix.html)
 //! * [Sparse Table](sparse_table/struct.SparseTable.html)
 //!  
@@ -50,6 +51,7 @@ pub mod lowlink;
 pub mod modint;
 pub mod rolling_hash;
 pub mod scc;
+pub mod segtree;
 pub mod sparse_table;
 pub mod tree_diameter;
 pub mod tsp;
