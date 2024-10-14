@@ -55,14 +55,14 @@ impl UnionFind {
     /// $`u`$ が含まれている集合と $`v`$ が含まれている集合が同じかどうかを検索する
     pub fn is_same(&mut self, u: usize, v: usize) -> bool {
         assert!(v < self.data.len() && u < self.data.len());
-        self._find(u) == self._find(v)
+        self.find(u) == self.find(v)
     }
 
     /// $`a`$ が含まれている集合と $`b`$ が含まれている集合を合併する
     pub fn unite(&mut self, mut a: usize, mut b: usize) -> () {
         assert!(a < self.data.len() && b < self.data.len());
-        a = self._find(a);
-        b = self._find(b);
+        a = self.find(a);
+        b = self.find(b);
 
         if a == b {
             return;
@@ -78,17 +78,20 @@ impl UnionFind {
     /// $`v`$ が含まれている集合の大きさを求める
     pub fn size(&mut self, mut v: usize) -> i32 {
         assert!(v < self.data.len());
-        v = self._find(v);
+        v = self.find(v);
         -self.data[v]
     }
 
-    fn _find(&mut self, v: usize) -> usize {
+    /// $`v`$ が含まれる素集合の代表元を求める
+    /// 
+    /// 本来は隠蔽してよい関数だと思われるが、これを使えたほうが実装しやすい問題がそれなりにあるので、一応 `pub` にしている
+    pub fn find(&mut self, v: usize) -> usize {
         assert!(v < self.data.len());
         if self.data[v] < 0 {
             return v;
         }
 
-        self.data[v] = self._find(self.data[v] as usize) as i32;
+        self.data[v] = self.find(self.data[v] as usize) as i32;
         return self.data[v] as usize;
     }
 }
