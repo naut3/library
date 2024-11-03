@@ -20,6 +20,10 @@
 //!
 //! * [木の直径](tree_diameter/fn.tree_diameter.html)
 //!
+//! ## 整数
+//!
+//! * [素因数分解](prime_factorize/fn.prime_factorize.html)
+//!
 //! ## 文字列
 //!
 //! * [Rolling Hash](rolling_hash/struct.RollingHash.html)
@@ -49,6 +53,7 @@ pub mod graph;
 pub mod integer_traits;
 pub mod lowlink;
 pub mod modint;
+pub mod prime_factorize;
 pub mod rolling_hash;
 pub mod scc;
 pub mod segtree;
